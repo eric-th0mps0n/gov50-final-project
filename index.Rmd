@@ -16,7 +16,57 @@ I am interested in exploring data related to veterans in politics, specifically 
 
 Are military veterans who run for political office more likely to win than non-veterans? Also, are veterans more likely to vote for fellow military veterans running for office than non-veterans? In this study, I plan to analyze voting results of military veterans and non-veteran candidates, as well as voting by US military veterans and non-veterans, to determine if veterans that run for political office are more likely to win than non-veterans. I hypothesize that veterans are more likely to win office than non-veterans, and that veterans are more likely to vote for fellow veterans than non-veteran candidates, and more so than non-veteran voters. I expect that there are more underlying factors that make this so, such as picking and choosing where and when to run by veteran candidates where they have the best chance to lure a particular set of voters, etc, but it would first be interesting to see if these hypotheses can be supported or not. My data is a CCES 2022 survey result, that includes a person's history with the military (i.e. currently serving, used to serve, never served), their political leanings, the candidates on which they voted for each election (House, Senate, President, Governor), and who the other candidate(s) were in those elections. The explanatory variables of interest would be whether a candidate is a veteran or not (determined by a value of 1 or 0 once the names are mutated to a variable that assigns a value based off the name) and whether or not a person is a veteran (for the second question). Currently the veteran is split up into 5 categories, but it will be changed to only be a 1 or 0 value, indicating if you have ever served in the military or not. The outcome variable would be the proportion of veterans that won their elections vs. the proportion of non-veterans who did, and for the question whether veterans are more likely to vote for fellow veterans the outcome will be the percentage of the time that veterans voted for veteran candidates vs. the time they voted for non-veteran candidates. It would also be interesting to see how often veterans vote outside of party lines for veteran candidates. If we see that veteran candidates win their elections more often in the dataset than non-veterans, this would provide support for my hypothesis. If we see that veterans vote more often for veteran candidates than non-veterans, this would also be supportive of my second hypothesis. A pattern that would disprove my hypothesis would be if we see that non-veteran candidates won elections a greater proportion of the time than veteran candidates, or that veterans were no more likely to vote for military veterans that were running for office than they were to vote for non-veterans. 
 
+```{r}
+library(tidyverse)
+library(dplyr)
+library(broom)
+```
 
 
+```{r}
+# load cces data
+cces <- read_csv("CCES22_edited.csv")
+vet_cand_names <- read_csv("Vet_Cand_Names.csv")
+```
 
+```{r}
+cces <- cces |> filter(CC22_401 == 5) |>
+  mutate(military_mem = if_else(milstat_1 == 1 | milstat_3 == 1, "Military", "Non-military"))
+```
+
+```{r}
+cces <- cces |>
+  mutate(vet_house_cand = if_else(HouseCand1Name_post %in% vet_cand_names$Name | HouseCand2Name_post %in% vet_cand_names$Name, "Veteran in Race", "No Veteran in Race")) |>
+  mutate(vet_sen_cand = if_else(SenCand1Name_post %in% vet_cand_names$Name | SenCand2Name_post %in% vet_cand_names$Name, "Veteran in Race", "No Veteran in Race")) |>
+  mutate(vet_on_ballot = if_else(vet_sen_cand == "Veteran in Race" | vet_house_cand == "Veteran in Race", "Veteran on Ballot", "No Veterans on Ballot"))
+
+```
+
+```{r}
+# create indicator for if a person voted for a military veteran candidate
+cces <- cces |>
+  mutate(voted_for_vet = if_else((HouseCand1Name_post %in% vet_cand_names$Name & CC22_412 == 1) | (HouseCand2Name_post %in% vet_cand_names$Name & CC22_412 == 2) | (SenCand1Name_post %in% vet_cand_names$Name & CC22_411 == 1) | (SenCand2Name_post %in% vet_cand_names$Name & CC22_411 == 2), 1, 0))
+
+# subset to just respondents that had a veteran on the ballot
+cces_vet_cands <- cces |> filter(vet_on_ballot == "Veteran on Ballot")
+
+# create a visual that shows the proportion of military members and veterans that vote for candidates that are veterans compared to non-veteran voters
+cces_vet_cands |>
+  mutate(voted_for_vet = if_else(voted_for_vet == 1,
+                             "Yes", "No")) |>
+  group_by(military_mem, voted_for_vet) |>
+  drop_na(voted_for_vet) |>
+  summarize(n = n()) |>
+  mutate(prop = n / sum(n)) |>
+  select(-n) |>
+  ggplot(mapping = aes(x = voted_for_vet, y = prop, fill = military_mem)) +
+   geom_col(position = "dodge")  +
+  labs(
+    x = "Voted for Veteran on Ballot",
+    y = "Proportion of Group",
+    title = "Difference Between Military and Civilian Voters when Military Vetrean Candidates are on the Ballot",
+    source = "CCES 2022 Midterm Election Data, Military Times"
+  ) + scale_fill_discrete(name = "Voter Military Affiliation")
+
+```
 
