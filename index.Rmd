@@ -51,7 +51,7 @@ cces <- cces |>
 cces_vet_cands <- cces |> filter(vet_on_ballot == "Veteran on Ballot")
 
 # create a visual that shows the proportion of military members and veterans that vote for candidates that are veterans compared to non-veteran voters
-cces_vet_cands |>
+vet_cand_vote <- cces_vet_cands |>
   mutate(voted_for_vet = if_else(voted_for_vet == 1,
                              "Yes", "No")) |>
   group_by(military_mem, voted_for_vet) |>
@@ -64,9 +64,10 @@ cces_vet_cands |>
   labs(
     x = "Voted for Veteran on Ballot",
     y = "Proportion of Group",
-    title = "Difference Between Military and Civilian Voters when Military Vetrean Candidates are on the Ballot",
+    title = "Vote Share Between Groups for Military Veteran Candidates",
     source = "CCES 2022 Midterm Election Data, Military Times"
   ) + scale_fill_discrete(name = "Voter Military Affiliation")
 
+vet_cand_vote
 ```
 
