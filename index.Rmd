@@ -62,12 +62,13 @@ vet_cand_vote <- cces_vet_cands |>
   ggplot(mapping = aes(x = voted_for_vet, y = prop, fill = military_mem)) +
    geom_col(position = "dodge")  +
   labs(
-    x = "Voted for Veteran on Ballot",
+    x = "Voted for Veteran on Ballot ",
     y = "Proportion of Group",
     title = "Vote Share Between Groups for Military Veteran Candidates",
     source = "CCES 2022 Midterm Election Data, Military Times"
   ) + scale_fill_discrete(name = "Voter Military Affiliation")
 
+#display visual
 vet_cand_vote
 ```
 
