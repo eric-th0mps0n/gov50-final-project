@@ -32,6 +32,14 @@ vet_cand_names <- read_csv("Vet_Cand_Names.csv")
 ```{r}
 cces <- cces |> filter(CC22_401 == 5) |>
   mutate(military_mem = if_else(milstat_1 == 1 | milstat_3 == 1, "Military", "Non-military"))
+
+# create visual
+mil_mem_count_bar <- cces |> group_by(military_mem) |>
+  summarize(n = n()) |>
+  ggplot(mapping = aes(x = military_mem, y = n, fill = military_mem)) +
+  geom_col()
+
+mil_mem_count_bar
 ```
 
 ```{r}
@@ -49,6 +57,24 @@ cces <- cces |>
 
 # subset to just respondents that had a veteran on the ballot
 cces_vet_cands <- cces |> filter(vet_on_ballot == "Veteran on Ballot")
+
+vet_cands_tab <- cces_vet_cands |>
+  group_by(military_mem, voted_for_vet) |>
+  drop_na(voted_for_vet) |>
+  summarize(n = n()) |>
+  mutate(prop = n / sum(n)) |>
+  select(-n) |>
+  pivot_wider(
+    names_from = voted_for_vet,
+    values_from = prop
+  )
+
+vet_cands_tab <- knitr::kable(
+  vet_cands_tab,
+  col.names = c("Voter Military Association", "Share that Voted For Non-Veteran Candidate", "Share that Voted for Veteran Candidate")
+) 
+
+vet_cands_tab
 
 # create a visual that shows the proportion of military members and veterans that vote for candidates that are veterans compared to non-veteran voters
 vet_cand_vote <- cces_vet_cands |>
