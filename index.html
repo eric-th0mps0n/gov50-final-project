@@ -1540,12 +1540,12 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>military_mem <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>milstat_1</span> <span class='op'>==</span> <span class='fl'>1</span> <span class='op'>|</span> <span class='va'>milstat_3</span> <span class='op'>==</span> <span class='fl'>1</span>, <span class='st'>"Military"</span>, <span class='st'>"Non-military"</span><span class='op'>)</span><span class='op'>)</span></span>
 <span></span>
 <span><span class='co'># create visual</span></span>
-<span><span class='va'>mil_mem_count_bar</span> <span class='op'>&lt;-</span> <span class='va'>cces</span> <span class='op'>|&gt;</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>military_mem</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span><span class='va'>mil_member_count_bar</span> <span class='op'>&lt;-</span> <span class='va'>cces</span> <span class='op'>|&gt;</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>military_mem</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarize</a></span><span class='op'>(</span>n <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/context.html'>n</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span>mapping <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>military_mem</span>, y <span class='op'>=</span> <span class='va'>n</span>, fill <span class='op'>=</span> <span class='va'>military_mem</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_bar.html'>geom_col</a></span><span class='op'>(</span><span class='op'>)</span></span>
 <span></span>
-<span><span class='va'>mil_mem_count_bar</span></span></code></pre>
+<span><span class='va'>mil_member_count_bar</span></span></code></pre>
 </div>
 <p><img src="index_files/figure-html5/unnamed-chunk-3-1.png" width="624" /></p>
 </div>
@@ -1566,7 +1566,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <span><span class='co'># subset to just respondents that had a veteran on the ballot</span></span>
 <span><span class='va'>cces_vet_cands</span> <span class='op'>&lt;-</span> <span class='va'>cces</span> <span class='op'>|&gt;</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>vet_on_ballot</span> <span class='op'>==</span> <span class='st'>"Veteran on Ballot"</span><span class='op'>)</span></span>
 <span></span>
-<span><span class='va'>vet_cands_tab</span> <span class='op'>&lt;-</span> <span class='va'>cces_vet_cands</span> <span class='op'>|&gt;</span></span>
+<span><span class='va'>vet_cand_tab</span> <span class='op'>&lt;-</span> <span class='va'>cces_vet_cands</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>military_mem</span>, <span class='va'>voted_for_vet</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://tidyr.tidyverse.org/reference/drop_na.html'>drop_na</a></span><span class='op'>(</span><span class='va'>voted_for_vet</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarize</a></span><span class='op'>(</span>n <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/context.html'>n</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
@@ -1577,12 +1577,12 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <span>    values_from <span class='op'>=</span> <span class='va'>prop</span></span>
 <span>  <span class='op'>)</span></span>
 <span></span>
-<span><span class='va'>vet_cands_tab</span> <span class='op'>&lt;-</span> <span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span></span>
-<span>  <span class='va'>vet_cands_tab</span>,</span>
+<span><span class='va'>vet_cand_tab</span> <span class='op'>&lt;-</span> <span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span></span>
+<span>  <span class='va'>vet_cand_tab</span>,</span>
 <span>  col.names <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Voter Military Association"</span>, <span class='st'>"Share that Voted For Non-Veteran Candidate"</span>, <span class='st'>"Share that Voted for Veteran Candidate"</span><span class='op'>)</span></span>
 <span><span class='op'>)</span> </span>
 <span></span>
-<span><span class='va'>vet_cands_tab</span></span></code></pre>
+<span><span class='va'>vet_cand_tab</span></span></code></pre>
 </div>
 <table>
 <colgroup>
