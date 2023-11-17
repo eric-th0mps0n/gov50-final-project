@@ -31,13 +31,19 @@ vet_cand_names <- read_csv("Vet_Cand_Names.csv")
 
 ```{r}
 cces <- cces |> filter(CC22_401 == 5) |>
-  mutate(military_mem = if_else(milstat_1 == 1 | milstat_3 == 1, "Military", "Non-military"))
+  mutate(military_mem = if_else(milstat_1 == 1 | milstat_3 == 1, "Military", "Non-Military"))
 
 # create visual
 mil_member_count_bar <- cces |> group_by(military_mem) |>
   summarize(n = n()) |>
   ggplot(mapping = aes(x = military_mem, y = n, fill = military_mem)) +
-  geom_col()
+  geom_col() +
+  labs(
+    x = "Military Affiliation of Voters",
+    y = "Count of Voters",
+    title = "Number of Military Affiliated and Non-Military Affiliated Voters in Sample",
+    source = "CCES 2022 Midterm Election Data, Military Times"
+  ) + scale_fill_discrete(name = "Voter Military Affiliation")
 
 mil_member_count_bar
 ```
@@ -76,6 +82,27 @@ vet_cand_tab <- knitr::kable(
 
 vet_cand_tab
 
+ATE <- cces_vet_cands |>
+  group_by(military_mem) |>
+  drop_na(voted_for_vet) |>
+  summarize(prop = mean(voted_for_vet)) |>
+  pivot_wider(
+    names_from = military_mem,
+    values_from = prop
+  ) |>
+  mutate("Average Treatment Effect" = Military - `Non-Military`)
+
+ATE <- knitr::kable(ATE,
+             col.names = c("Military-Affiliated Voters", "Non-Military Affiliated Voters", "Average Treatment Effect"))
+
+ATE
+```
+
+Here in these tables we see the difference in means between voters that have either served in the military or current do (Military-Affiliated Voters) vs. voters that have never served in the military (Non-Military Affiliated Voters). The estimated average treatment effect suggests that military-affiliated voters are 2.07 percentage points more likely to vote for candidates that are military veterans themselves than non-military affiliated voters are. 
+
+Continuing into the project further, I will develop a p-value, a confidence interval, and some further visuals to determine how significant this difference is. At first glance, the difference does not appear significant, and honestly I expected the gap to be much wider. It could possibly be that voters simply vote along party lines, regardless of the candidate and their military affiliation. 
+
+```{r} 
 # create a visual that shows the proportion of military members and veterans that vote for candidates that are veterans compared to non-veteran voters
 vet_cand_vote <- cces_vet_cands |>
   mutate(voted_for_vet = if_else(voted_for_vet == 1,
