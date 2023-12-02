@@ -1738,27 +1738,12 @@ Average Treatment Effect
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>cces_vet_cands</span><span class='op'>$</span><span class='va'>military_mem</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='va'>cces_vet_cands</span><span class='op'>$</span><span class='va'>military_mem</span>, levels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Non-Military"</span>, <span class='st'>"Military"</span><span class='op'>)</span><span class='op'>)</span></span>
 <span><span class='va'>reg_vote</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>voted_for_vet</span> <span class='op'>~</span> <span class='va'>military_mem</span>, data <span class='op'>=</span> <span class='va'>cces_vet_cands</span><span class='op'>)</span></span>
-<span></span>
-<span><span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span><span class='op'>(</span><span class='va'>reg_vote</span><span class='op'>)</span></span></code></pre>
-</div>
-<pre><code>         (Intercept) military_memMilitary 
-          0.52753623           0.02067657 </code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/glance.html'>glance</a></span><span class='op'>(</span><span class='va'>reg_vote</span><span class='op'>)</span></span></code></pre>
-</div>
-<pre><code># A tibble: 1 × 12
-  r.squared adj.r.squared sigma statistic p.value    df  logLik    AIC
-      &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;
-1  0.000196      0.000141 0.499      3.59  0.0583     1 -13229. 26464.
-# ℹ 4 more variables: BIC &lt;dbl&gt;, deviance &lt;dbl&gt;, df.residual &lt;int&gt;,
-#   nobs &lt;int&gt;</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>regression_model</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/modelsummary/man/modelsummary.html'>modelsummary</a></span><span class='op'>(</span><span class='va'>reg_vote</span>, coef_rename <span class='op'>=</span> <span class='cn'>TRUE</span>, fmt <span class='op'>=</span> <span class='fl'>4</span>, title <span class='op'>=</span> <span class='st'>"Regression Output of Military-Affiliation on Voting for Vetrean Candidates"</span><span class='op'>)</span></span>
+<span><span class='va'>regression_model</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/modelsummary/man/modelsummary.html'>modelsummary</a></span><span class='op'>(</span><span class='va'>reg_vote</span>, coef_rename <span class='op'>=</span> <span class='cn'>TRUE</span>, fmt <span class='op'>=</span> <span class='fl'>4</span>, title <span class='op'>=</span> <span class='st'>"Regression Output of Military-Affiliation on Voting for Veteran Candidates"</span><span class='op'>)</span></span>
 <span><span class='va'>regression_model</span></span></code></pre>
 </div>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
-<span id="tab:unnamed-chunk-8">Table 1: </span>Regression Output of Military-Affiliation on Voting for Vetrean Candidates
+<span id="tab:unnamed-chunk-8">Table 1: </span>Regression Output of Military-Affiliation on Voting for Veteran Candidates
 </caption>
 <thead>
 <tr>
@@ -1858,10 +1843,11 @@ RMSE
 </tr>
 </tbody>
 </table>
-</div>
-<div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>ATE</span> <span class='op'>&lt;-</span> <span class='va'>cces_vet_cands</span> <span class='op'>|&gt;</span></span>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>voter_counts</span> <span class='op'>&lt;-</span> <span class='va'>cces_vet_cands</span> <span class='op'>|&gt;</span> </span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/count.html'>count</a></span><span class='op'>(</span><span class='va'>military_mem</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>ATE</span> <span class='op'>&lt;-</span> <span class='va'>cces_vet_cands</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>military_mem</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://tidyr.tidyverse.org/reference/drop_na.html'>drop_na</a></span><span class='op'>(</span><span class='va'>voted_for_vet</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarize</a></span><span class='op'>(</span>prop <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>voted_for_vet</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
@@ -1880,79 +1866,7 @@ RMSE
 <span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/specify.html'>specify</a></span><span class='op'>(</span><span class='va'>vote</span> <span class='op'>~</span> <span class='va'>military_mem</span>, success <span class='op'>=</span> <span class='st'>"Voted"</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/calculate.html'>calculate</a></span><span class='op'>(</span>stat <span class='op'>=</span> <span class='st'>"diff in props"</span>, order <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Military"</span>, <span class='st'>"Non-Military"</span><span class='op'>)</span><span class='op'>)</span></span>
 <span></span>
-<span><span class='va'>null_dist</span> <span class='op'>&lt;-</span> <span class='va'>cces_vet_cands_test</span> <span class='op'>|&gt;</span></span>
-<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/specify.html'>specify</a></span><span class='op'>(</span><span class='va'>vote</span> <span class='op'>~</span> <span class='va'>military_mem</span>, success <span class='op'>=</span> <span class='st'>"Voted"</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
-<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/hypothesize.html'>hypothesize</a></span><span class='op'>(</span>null <span class='op'>=</span> <span class='st'>"independence"</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
-<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/generate.html'>generate</a></span><span class='op'>(</span>reps <span class='op'>=</span> <span class='fl'>1000</span>, type <span class='op'>=</span> <span class='st'>"permute"</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
-<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/calculate.html'>calculate</a></span><span class='op'>(</span>stat <span class='op'>=</span> <span class='st'>"diff in props"</span>, order <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Military"</span>, <span class='st'>"Non-Military"</span><span class='op'>)</span><span class='op'>)</span></span>
-<span></span>
-<span><span class='va'>ate_pval</span> <span class='op'>&lt;-</span> <span class='va'>null_dist</span> <span class='op'>|&gt;</span></span>
-<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/get_p_value.html'>get_p_value</a></span><span class='op'>(</span>obs_stat <span class='op'>=</span> <span class='va'>est_ate</span>, direction <span class='op'>=</span> <span class='st'>"both"</span><span class='op'>)</span></span>
-<span></span>
-<span><span class='va'>null_dist</span> <span class='op'>|&gt;</span></span>
-<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/visualize.html'>visualize</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span></span>
-<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/shade_p_value.html'>shade_p_value</a></span><span class='op'>(</span>obs_stat <span class='op'>=</span> <span class='va'>est_ate</span>, direction <span class='op'>=</span> <span class='st'>"both"</span><span class='op'>)</span></span></code></pre>
-</div>
-<img src="index_files/figure-html5/unnamed-chunk-9-1.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>ci</span> <span class='op'>&lt;-</span> <span class='va'>null_dist</span> <span class='op'>|&gt;</span></span>
-<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/get_confidence_interval.html'>get_ci</a></span><span class='op'>(</span>level <span class='op'>=</span> <span class='fl'>0.95</span><span class='op'>)</span></span>
-<span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>ci</span><span class='op'>)</span></span></code></pre>
-</div>
-<table>
-<thead>
-<tr>
-<th style="text-align:right;">
-lower_ci
-</th>
-<th style="text-align:right;">
-upper_ci
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:right;">
--0.0209651
-</td>
-<td style="text-align:right;">
-0.0216458
-</td>
-</tr>
-</tbody>
-</table>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>ate_pval</span><span class='op'>)</span></span></code></pre>
-</div>
-<table>
-<thead>
-<tr>
-<th style="text-align:right;">
-p_value
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:right;">
-0.07
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>cces_vet_cands</span> <span class='op'>|&gt;</span></span>
-<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/count.html'>count</a></span><span class='op'>(</span><span class='va'>military_mem</span><span class='op'>)</span></span></code></pre>
-</div>
-<pre><code># A tibble: 2 × 2
-  military_mem     n
-  &lt;fct&gt;        &lt;int&gt;
-1 Non-Military 15895
-2 Military      2409</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>se_diff</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='op'>(</span><span class='op'>(</span><span class='fl'>0.5482128</span><span class='op'>*</span><span class='op'>(</span><span class='fl'>1</span> <span class='op'>-</span> <span class='fl'>0.5482128</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>/</span> <span class='fl'>2409</span><span class='op'>)</span> <span class='op'>+</span> <span class='op'>(</span><span class='op'>(</span><span class='fl'>0.5275362</span> <span class='op'>*</span> <span class='op'>(</span><span class='fl'>1</span> <span class='op'>-</span> <span class='fl'>0.5275362</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>/</span> <span class='fl'>15895</span><span class='op'>)</span><span class='op'>)</span></span>
+<span><span class='va'>se_diff</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='op'>(</span><span class='op'>(</span><span class='fl'>0.5482128</span><span class='op'>*</span><span class='op'>(</span><span class='fl'>1</span> <span class='op'>-</span> <span class='fl'>0.5482128</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>/</span> <span class='fl'>2409</span><span class='op'>)</span> <span class='op'>+</span> <span class='op'>(</span><span class='op'>(</span><span class='fl'>0.5275362</span> <span class='op'>*</span> <span class='op'>(</span><span class='fl'>1</span> <span class='op'>-</span> <span class='fl'>0.5275362</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>/</span> <span class='fl'>15895</span><span class='op'>)</span><span class='op'>)</span></span>
 <span></span>
 <span><span class='va'>z_score</span> <span class='op'>=</span> <span class='va'>est_ate</span> <span class='op'>/</span> <span class='va'>se_diff</span></span>
 <span></span>
@@ -2011,7 +1925,77 @@ Upper Confidence Interval
 <p>These tables and plots above show the difference-in-means between voters that have either served in the military or currently do (Military-Affiliated Voters) vs. voters that have never served in the military (Non-Military Affiliated Voters). The estimated average treatment effect suggests that military-affiliated voters are 2.07 percentage points more likely to vote for candidates that are military veterans themselves than non-military affiliated voters are.</p>
 <p>While the coefficient of interest tells us that the treatment of being in the military makes you 2.07 percentage points more likely to vote for candidates that are themselves military veterans than voters that have no military affiliation, we should not interpret this treatment as causal. Using an alpha of 0.05 and looking at the p-value of the regression, as well as the p-values coming from the permutation test and the calculations using the standard error of the difference-in-means, all of them are above 0.05. While all of the p-values hovered just above the significance cutoff of 0.05, they were still over that threshold, meaning that we fail to reject the null hypothesis that there is no difference in voting rates for veteran candidates between military-affiliated voters and voters with no military affiliation.</p>
 <p>Additionally, the 95% confidence interval of (0, 0.042) is another reason why the results should not be interpreted causally. Since 0 is within the confidence interval, even though it is at the extremely low end, it cannot be ruled out within our chosen confidence parameters that there is no effect on voting for military veterans from having served in the military.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># Permutation Test</span></span>
+<span><span class='va'>null_dist</span> <span class='op'>&lt;-</span> <span class='va'>cces_vet_cands_test</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/specify.html'>specify</a></span><span class='op'>(</span><span class='va'>vote</span> <span class='op'>~</span> <span class='va'>military_mem</span>, success <span class='op'>=</span> <span class='st'>"Voted"</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/hypothesize.html'>hypothesize</a></span><span class='op'>(</span>null <span class='op'>=</span> <span class='st'>"independence"</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/generate.html'>generate</a></span><span class='op'>(</span>reps <span class='op'>=</span> <span class='fl'>1000</span>, type <span class='op'>=</span> <span class='st'>"permute"</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/calculate.html'>calculate</a></span><span class='op'>(</span>stat <span class='op'>=</span> <span class='st'>"diff in props"</span>, order <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Military"</span>, <span class='st'>"Non-Military"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>ate_pval</span> <span class='op'>&lt;-</span> <span class='va'>null_dist</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/get_p_value.html'>get_p_value</a></span><span class='op'>(</span>obs_stat <span class='op'>=</span> <span class='va'>est_ate</span>, direction <span class='op'>=</span> <span class='st'>"both"</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>null_dist</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/visualize.html'>visualize</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/shade_p_value.html'>shade_p_value</a></span><span class='op'>(</span>obs_stat <span class='op'>=</span> <span class='va'>est_ate</span>, direction <span class='op'>=</span> <span class='st'>"both"</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span></span>
+<span>    x <span class='op'>=</span> <span class='st'>"Sample Average Diff-in-Means"</span>,</span>
+<span>    y <span class='op'>=</span> <span class='st'>"Count of Samples"</span>,</span>
+<span>    title <span class='op'>=</span> <span class='st'>"Permutation Test Sample Distribution"</span></span>
+<span>  <span class='op'>)</span></span></code></pre>
+</div>
+<img src="index_files/figure-html5/unnamed-chunk-9-1.png" width="624" />
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>ci</span> <span class='op'>&lt;-</span> <span class='va'>null_dist</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/get_confidence_interval.html'>get_ci</a></span><span class='op'>(</span>level <span class='op'>=</span> <span class='fl'>0.95</span><span class='op'>)</span></span>
+<span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>ci</span><span class='op'>)</span></span></code></pre>
+</div>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">
+lower_ci
+</th>
+<th style="text-align:right;">
+upper_ci
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+-0.0205104
+</td>
+<td style="text-align:right;">
+0.0226031
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>ate_pval</span><span class='op'>)</span></span></code></pre>
+</div>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">
+p_value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+0.084
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Additionally, to increase the confidence that we cannot reject the null hypothesis, even though the results are close, the p-value from the permutation test is still above our alpha of 0.05.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

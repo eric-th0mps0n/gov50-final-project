@@ -160,16 +160,12 @@ vet_cand_vote
 ```{r}
 cces_vet_cands$military_mem <- factor(cces_vet_cands$military_mem, levels = c("Non-Military", "Military"))
 reg_vote <- lm(voted_for_vet ~ military_mem, data = cces_vet_cands)
-
-coef(reg_vote)
-
-glance(reg_vote)
-
-regression_model <- modelsummary(reg_vote, coef_rename = TRUE, fmt = 4, title = "Regression Output of Military-Affiliation on Voting for Vetrean Candidates")
+regression_model <- modelsummary(reg_vote, coef_rename = TRUE, fmt = 4, title = "Regression Output of Military-Affiliation on Voting for Veteran Candidates")
 regression_model
-```
 
-```{r}
+voter_counts <- cces_vet_cands |> 
+  count(military_mem)
+
 ATE <- cces_vet_cands |>
   group_by(military_mem) |>
   drop_na(voted_for_vet) |>
@@ -188,30 +184,6 @@ cces_vet_cands_test <- cces_vet_cands |>
 est_ate <- cces_vet_cands_test |>
   specify(vote ~ military_mem, success = "Voted") |>
   calculate(stat = "diff in props", order = c("Military", "Non-Military"))
-
-null_dist <- cces_vet_cands_test |>
-  specify(vote ~ military_mem, success = "Voted") |>
-  hypothesize(null = "independence") |>
-  generate(reps = 1000, type = "permute") |>
-  calculate(stat = "diff in props", order = c("Military", "Non-Military"))
-
-ate_pval <- null_dist |>
-  get_p_value(obs_stat = est_ate, direction = "both")
-
-null_dist |>
-  visualize() +
-  shade_p_value(obs_stat = est_ate, direction = "both")
-
-ci <- null_dist |>
-  get_ci(level = 0.95)
-knitr::kable(ci)
-
-knitr::kable(ate_pval)
-```
-
-```{r}
-cces_vet_cands |>
-  count(military_mem)
 
 se_diff <- sqrt(((0.5482128*(1 - 0.5482128)) / 2409) + ((0.5275362 * (1 - 0.5275362)) / 15895))
 
@@ -233,6 +205,36 @@ value_table
   
   While the coefficient of interest tells us that the treatment of being in the military makes you 2.07 percentage points more likely to vote for candidates that are themselves military veterans than voters that have no military affiliation, we should not interpret this treatment as causal. Using an alpha of 0.05 and looking at the p-value of the regression, as well as the p-values coming from the permutation test and the calculations using the standard error of the difference-in-means, all of them are above 0.05. While all of the p-values hovered just above the significance cutoff of 0.05, they were still over that threshold, meaning that we fail to reject the null hypothesis that there is no difference in voting rates for veteran candidates between military-affiliated voters and voters with no military affiliation. 
   
-  Additionally, the 95% confidence interval of (0, 0.042) is another reason why the results should not be interpreted causally. Since 0 is within the confidence interval, even though it is at the extremely low end, it cannot be ruled out within our chosen confidence parameters that there is no effect on voting for military veterans from having served in the military. 
+  Additionally, the 95% confidence interval of (0, 0.042) is another reason why the results should not be interpreted causally. Since 0 is within the confidence interval, even though it is at the extremely low end, it cannot be ruled out within our chosen confidence parameters that there is no effect on voting for military veterans from having served in the military.
+
+```{r}
+# Permutation Test
+null_dist <- cces_vet_cands_test |>
+  specify(vote ~ military_mem, success = "Voted") |>
+  hypothesize(null = "independence") |>
+  generate(reps = 1000, type = "permute") |>
+  calculate(stat = "diff in props", order = c("Military", "Non-Military"))
+
+ate_pval <- null_dist |>
+  get_p_value(obs_stat = est_ate, direction = "both")
+
+null_dist |>
+  visualize() +
+  shade_p_value(obs_stat = est_ate, direction = "both") +
+  labs(
+    x = "Sample Average Diff-in-Means",
+    y = "Count of Samples",
+    title = "Permutation Test Sample Distribution"
+  )
+
+ci <- null_dist |>
+  get_ci(level = 0.95)
+knitr::kable(ci)
+
+knitr::kable(ate_pval)
+```
+
+Additionally, to increase the confidence that we cannot reject the null hypothesis, even though the results are close, the p-value from the permutation test is still above our alpha of 0.05.
+ 
 
 
