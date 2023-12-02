@@ -1521,8 +1521,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <div class="d-article">
 <h2 id="introduction">Introduction</h2>
 <p>For this research paper, the main question is: Are military-affiliated voters more likely to vote for fellow military veterans running for federal office (House of Representatives and Senate) than voters that have no military affiliation? In this study, I seek to show that voters with prior or current military affiliation are more likely to vote for candidates that are themselves miliatry veterans than voters that have no military affiliation through their own service. My hypotheses are as follows:</p>
-<p>Null: there is no difference in voting patterns for military veteran candidates between voters that have military service and voters that do not
-Alternative: military-affiliated voters are more likely to vote for fellow veterans than non-military-affiliated voters.</p>
+<p>Null: there is no difference in voting patterns for military veteran candidates between voters that have military service and voters that do not</p>
+<p>Alternative: military-affiliated voters are more likely to vote for fellow veterans than non-military-affiliated voters.</p>
 <p>This research question and hypothesis are important because they could have impacts on political races going into the future. As the wars in the Middle East that have been being fought for the last 20-some years come to a close, more military veterans will be getting out of the military and going into other lines of work. One profession that draws a fair amount of military talent is politics. It would be a huge leg up if military veteran candidates were more likely to get a portion of the vote just based off their prior work experience, regardless of political party affiliation, where their opponent does not have that luxury.</p>
 <h2 id="data-section">Data Section</h2>
 <p>My data comes from a CCES 2022 survey, which includes a person’s history with the military (i.e. currently serving, used to serve, never served), their political leanings, the candidates on which they voted for each election (House, Senate, President, Governor), and who the other candidate(s) were in those elections.</p>
@@ -1878,7 +1878,7 @@ RMSE
 <span><span class='va'>values</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>se_diff</span>, <span class='va'>z_score</span>, <span class='va'>p_val</span>, <span class='va'>ci_lower</span><span class='op'>$</span><span class='va'>stat</span>, <span class='va'>ci_upper</span><span class='op'>$</span><span class='va'>stat</span><span class='op'>)</span></span>
 <span></span>
 <span><span class='va'>value_table</span> <span class='op'>&lt;-</span> <span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>values</span>,</span>
-<span>             col.names <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Standard Error"</span>, <span class='st'>"Z-Score"</span>, <span class='st'>"P-Value"</span>, <span class='st'>"Lower Confidence Interval"</span>, <span class='st'>"Upper Confidence Interval"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span>             col.names <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Standard Error"</span>, <span class='st'>"Z-Score"</span>, <span class='st'>"P-Value"</span>, <span class='st'>"Lower 95% Confidence Interval"</span>, <span class='st'>"Upper 95% Confidence Interval"</span><span class='op'>)</span><span class='op'>)</span></span>
 <span><span class='va'>value_table</span></span></code></pre>
 </div>
 <table>
@@ -1894,10 +1894,10 @@ Z-Score
 P-Value
 </th>
 <th style="text-align:right;">
-Lower Confidence Interval
+Lower 95% Confidence Interval
 </th>
 <th style="text-align:right;">
-Upper Confidence Interval
+Upper 95% Confidence Interval
 </th>
 </tr>
 </thead>
@@ -1966,10 +1966,10 @@ upper_ci
 <tbody>
 <tr>
 <td style="text-align:right;">
--0.0219224
+-0.0228796
 </td>
 <td style="text-align:right;">
-0.0206885
+0.0206766
 </td>
 </tr>
 </tbody>
@@ -1988,13 +1988,13 @@ p_value
 <tbody>
 <tr>
 <td style="text-align:right;">
-0.052
+0.06
 </td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>Additionally, to increase the confidence that we cannot reject the null hypothesis, even though the results are close, the p-value from the permutation test is still above our alpha of 0.05.</p>
+<p>Additionally, to increase the confidence that we cannot reject the null hypothesis, even though the results are close, the p-value from the permutation test is still above our alpha of 0.05. Therefore, based off of our chosen alpha and the results of the permutation test, we cannot rule out that the 0.0207 estimated average treatment effect that we observed in our data set happened by chance, and that there really is no difference betweeen military-affiliated voters and voters with no military affiliation when it comes to voting for candidates that are themselves military veterans.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
