@@ -7,19 +7,30 @@ output:
     self_contained: false
 ---
 
+## Introduction
 
-
-## Project thoughts
-
-I am interested in exploring data related to veterans in politics, specifically looking at if veterans are more likely to win political races or if veterans are more likely to vote for veteran candidates.
-
-
-Are military veterans who run for political office more likely to win than non-veterans? Also, are veterans more likely to vote for fellow military veterans running for office than non-veterans? In this study, I plan to analyze voting results of military veterans and non-veteran candidates, as well as voting by US military veterans and non-veterans, to determine if veterans that run for political office are more likely to win than non-veterans. I hypothesize that veterans are more likely to win office than non-veterans, and that veterans are more likely to vote for fellow veterans than non-veteran candidates, and more so than non-veteran voters. I expect that there are more underlying factors that make this so, such as picking and choosing where and when to run by veteran candidates where they have the best chance to lure a particular set of voters, etc, but it would first be interesting to see if these hypotheses can be supported or not. My data is a CCES 2022 survey result, that includes a person's history with the military (i.e. currently serving, used to serve, never served), their political leanings, the candidates on which they voted for each election (House, Senate, President, Governor), and who the other candidate(s) were in those elections. The explanatory variables of interest would be whether a candidate is a veteran or not (determined by a value of 1 or 0 once the names are mutated to a variable that assigns a value based off the name) and whether or not a person is a veteran (for the second question). Currently the veteran is split up into 5 categories, but it will be changed to only be a 1 or 0 value, indicating if you have ever served in the military or not. The outcome variable would be the proportion of veterans that won their elections vs. the proportion of non-veterans who did, and for the question whether veterans are more likely to vote for fellow veterans the outcome will be the percentage of the time that veterans voted for veteran candidates vs. the time they voted for non-veteran candidates. It would also be interesting to see how often veterans vote outside of party lines for veteran candidates. If we see that veteran candidates win their elections more often in the dataset than non-veterans, this would provide support for my hypothesis. If we see that veterans vote more often for veteran candidates than non-veterans, this would also be supportive of my second hypothesis. A pattern that would disprove my hypothesis would be if we see that non-veteran candidates won elections a greater proportion of the time than veteran candidates, or that veterans were no more likely to vote for military veterans that were running for office than they were to vote for non-veterans. 
+  For this research paper, the main question is: Are military-affiliated voters more likely to vote for fellow military veterans running for federal office (House of Representatives and Senate) than voters that have no military affiliation? In this study, I seek to show that voters with prior or current military affiliation are more likely to vote for candidates that are themselves miliatry veterans than voters that have no military affiliation through their own service. My hypotheses are as follows:
+  
+  Null: there is no difference in voting patterns for military veteran candidates between voters that have military service and voters that do not
+  Alternative: military-affiliated voters are more likely to vote for fellow veterans than non-military-affiliated voters.
+  
+  This research question and hypothesis are important because they could have impacts on political races going into the future. As the wars in the Middle East that have been being fought for the last 20-some years come to a close, more military veterans will be getting out of the military and going into other lines of work. One profession that draws a fair amount of military talent is politics. It would be a huge leg up if military veteran candidates were more likely to get a portion of the vote just based off their prior work experience, regardless of political party affiliation, where their opponent does not have that luxury. 
+  
+## Data Section
+  
+  My data comes from a CCES 2022 survey, which includes a person's history with the military (i.e. currently serving, used to serve, never served), their political leanings, the candidates on which they voted for each election (House, Senate, President, Governor), and who the other candidate(s) were in those elections. 
+  
+  The explanatory variables of interest would be 1) whether a candidate is a veteran or not and 2) whether or not a voter has any military affiliation or not, with military affiliation defined as either having served in the military in the past or currently serving. In order to determine which candidates are veterans, I will have to bring in a separate data set that contains all of the veterans that ran for House representative and Senate positions in 2022 and from there create a binary variable that indicates if a candidate is a veteran, then use that binary variable to create another one that determines whether a voter voted for the veteran candidate or not. Currently the military affiliation is split up into 5 categories, but it will be changed to only be a 1 or 0 value, indicating if you have ever served in the military or not. 
+  
+  The outcome variable would be the percentage of the time that military-affiliated voters voted for veteran candidates compared to non-military-affiliated voters. If we see that military-affiliated voters vote more often for veteran candidates than non-veterans and it is statistically significant, this would be supportive of my hypothesis. A pattern that would disprove my hypothesis would be if we see that military-affiliated voters were no more likely to vote for military veteran candidates that were running for office than voters who have no military affiliation were. 
+  Since this study is going to compare the voting trends between two separate groups, where the data was collected from both groups at one point in time, the research design is a cross-sectional design, looking specifically at a difference-in-means between the two groups.
 
 ```{r}
 library(tidyverse)
 library(dplyr)
 library(broom)
+library(infer)
+library(modelsummary)
 ```
 
 
@@ -47,6 +58,31 @@ mil_member_count_bar <- cces |> group_by(military_mem) |>
 
 mil_member_count_bar
 ```
+
+Here we can see that military-affiliated voters are largely outnumbered by voters that have no military affiliation, which is to be expected based off of demographic trends in the United States where the data was pulled from. The number of people in the US that have never served in the military is far greater than the number of people that have, so these numbers appear to be representative of the country as a whole. 
+
+```{r}
+cces <- cces |>
+  mutate(vet_house_cand = if_else(HouseCand1Name_post %in% vet_cand_names$Name | HouseCand2Name_post %in% vet_cand_names$Name, "Veteran in Race", "No Veteran in Race")) |>
+  mutate(vet_sen_cand = if_else(SenCand1Name_post %in% vet_cand_names$Name | SenCand2Name_post %in% vet_cand_names$Name, "Veteran in Race", "No Veteran in Race")) |>
+  mutate(vet_on_ballot = if_else(vet_sen_cand == "Veteran in Race" | vet_house_cand == "Veteran in Race", "Veteran on Ballot", "No Veterans on Ballot"))
+
+cces |> group_by(vet_on_ballot) |>
+  summarize(n = n(), na.rm = TRUE) |>
+            mutate(prop = n / sum(n)) |>
+   ggplot(mapping = aes(x = vet_on_ballot, y = prop, fill = vet_on_ballot)) +
+   geom_col() +
+  labs(
+    x = "Were Veterans on the Voting Ballot",
+    y = "Proportion of Total Ballots",
+    title = "Proportion of respondents that had at least one veteran on their voting ballot",
+  ) +
+  scale_fill_discrete(name = "Ballot Indicator")
+```
+
+This visual shows the proportion of observations in the data set where the voter voted in at least one election where a veteran candidate was available to vote for on their ballot. While the proportion indicates a little less than half of the observations had this option, it still leaves a large number of observations (18276) with which to conduct the analysis of interest to this study. 
+
+## Results Section
 
 ```{r}
 cces <- cces |>
@@ -98,10 +134,6 @@ ATE <- knitr::kable(ATE,
 ATE
 ```
 
-Here in these tables we see the difference in means between voters that have either served in the military or current do (Military-Affiliated Voters) vs. voters that have never served in the military (Non-Military Affiliated Voters). The estimated average treatment effect suggests that military-affiliated voters are 2.07 percentage points more likely to vote for candidates that are military veterans themselves than non-military affiliated voters are. 
-
-Continuing into the project further, I will develop a p-value, a confidence interval, and some further visuals to determine how significant this difference is. At first glance, the difference does not appear significant, and honestly I expected the gap to be much wider. It could possibly be that voters simply vote along party lines, regardless of the candidate and their military affiliation. 
-
 ```{r} 
 # create a visual that shows the proportion of military members and veterans that vote for candidates that are veterans compared to non-veteran voters
 vet_cand_vote <- cces_vet_cands |>
@@ -124,4 +156,83 @@ vet_cand_vote <- cces_vet_cands |>
 #display visual
 vet_cand_vote
 ```
+
+```{r}
+cces_vet_cands$military_mem <- factor(cces_vet_cands$military_mem, levels = c("Non-Military", "Military"))
+reg_vote <- lm(voted_for_vet ~ military_mem, data = cces_vet_cands)
+
+coef(reg_vote)
+
+glance(reg_vote)
+
+regression_model <- modelsummary(reg_vote, coef_rename = TRUE, fmt = 4, title = "Regression Output of Military-Affiliation on Voting for Vetrean Candidates")
+regression_model
+```
+
+```{r}
+ATE <- cces_vet_cands |>
+  group_by(military_mem) |>
+  drop_na(voted_for_vet) |>
+  summarize(prop = mean(voted_for_vet)) |>
+  pivot_wider(
+    names_from = military_mem,
+    values_from = prop
+  ) |>
+  mutate("Average Treatment Effect" = Military - `Non-Military`)
+
+cces_vet_cands_test <- cces_vet_cands |>
+  mutate(vote = if_else(voted_for_vet == 1, "Voted", "Didn't Vote")) |>
+  select(vote, voted_for_vet, military_mem) |>
+  na.omit()
+
+est_ate <- cces_vet_cands_test |>
+  specify(vote ~ military_mem, success = "Voted") |>
+  calculate(stat = "diff in props", order = c("Military", "Non-Military"))
+
+null_dist <- cces_vet_cands_test |>
+  specify(vote ~ military_mem, success = "Voted") |>
+  hypothesize(null = "independence") |>
+  generate(reps = 1000, type = "permute") |>
+  calculate(stat = "diff in props", order = c("Military", "Non-Military"))
+
+ate_pval <- null_dist |>
+  get_p_value(obs_stat = est_ate, direction = "both")
+
+null_dist |>
+  visualize() +
+  shade_p_value(obs_stat = est_ate, direction = "both")
+
+ci <- null_dist |>
+  get_ci(level = 0.95)
+knitr::kable(ci)
+
+knitr::kable(ate_pval)
+```
+
+```{r}
+cces_vet_cands |>
+  count(military_mem)
+
+se_diff <- sqrt(((0.5482128*(1 - 0.5482128)) / 2409) + ((0.5275362 * (1 - 0.5275362)) / 15895))
+
+z_score = est_ate / se_diff
+
+p_val <- 2 * pnorm(1.899468, lower.tail = FALSE)
+
+ci_upper <- est_ate + (se_diff * 1.96)
+ci_lower <- est_ate - (se_diff * 1.96)
+
+values <- data.frame(se_diff, z_score, p_val, ci_lower$stat, ci_upper$stat)
+
+value_table <- knitr::kable(values,
+             col.names = c("Standard Error", "Z-Score", "P-Value", "Lower Confidence Interval", "Upper Confidence Interval"))
+value_table
+```
+
+  These tables and plots above show the difference-in-means between voters that have either served in the military or currently do (Military-Affiliated Voters) vs. voters that have never served in the military (Non-Military Affiliated Voters). The estimated average treatment effect suggests that military-affiliated voters are 2.07 percentage points more likely to vote for candidates that are military veterans themselves than non-military affiliated voters are. 
+  
+  While the coefficient of interest tells us that the treatment of being in the military makes you 2.07 percentage points more likely to vote for candidates that are themselves military veterans than voters that have no military affiliation, we should not interpret this treatment as causal. Using an alpha of 0.05 and looking at the p-value of the regression, as well as the p-values coming from the permutation test and the calculations using the standard error of the difference-in-means, all of them are above 0.05. While all of the p-values hovered just above the significance cutoff of 0.05, they were still over that threshold, meaning that we fail to reject the null hypothesis that there is no difference in voting rates for veteran candidates between military-affiliated voters and voters with no military affiliation. 
+  
+  Additionally, the 95% confidence interval of (0, 0.042) is another reason why the results should not be interpreted causally. Since 0 is within the confidence interval, even though it is at the extremely low end, it cannot be ruled out within our chosen confidence parameters that there is no effect on voting for military veterans from having served in the military. 
+
 
