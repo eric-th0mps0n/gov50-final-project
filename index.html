@@ -1859,11 +1859,11 @@ Num.Obs.
 <span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/specify.html'>specify</a></span><span class='op'>(</span><span class='va'>vote</span> <span class='op'>~</span> <span class='va'>military_mem</span>, success <span class='op'>=</span> <span class='st'>"Voted"</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://infer.tidymodels.org/reference/calculate.html'>calculate</a></span><span class='op'>(</span>stat <span class='op'>=</span> <span class='st'>"diff in props"</span>, order <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Military"</span>, <span class='st'>"Non-Military"</span><span class='op'>)</span><span class='op'>)</span></span>
 <span></span>
-<span><span class='va'>se_diff</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='op'>(</span><span class='op'>(</span><span class='fl'>0.5482128</span><span class='op'>*</span><span class='op'>(</span><span class='fl'>1</span> <span class='op'>-</span> <span class='fl'>0.5482128</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>/</span> <span class='fl'>2409</span><span class='op'>)</span> <span class='op'>+</span> <span class='op'>(</span><span class='op'>(</span><span class='fl'>0.5275362</span> <span class='op'>*</span> <span class='op'>(</span><span class='fl'>1</span> <span class='op'>-</span> <span class='fl'>0.5275362</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>/</span> <span class='fl'>15895</span><span class='op'>)</span><span class='op'>)</span></span>
+<span><span class='va'>se_diff</span> <span class='op'>&lt;-</span> <span class='fl'>0.010918</span></span>
 <span></span>
 <span><span class='va'>z_score</span> <span class='op'>=</span> <span class='va'>est_ate</span> <span class='op'>/</span> <span class='va'>se_diff</span></span>
 <span></span>
-<span><span class='va'>p_val</span> <span class='op'>&lt;-</span> <span class='fl'>2</span> <span class='op'>*</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>pnorm</a></span><span class='op'>(</span><span class='fl'>1.899468</span>, lower.tail <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></span>
+<span><span class='va'>p_val</span> <span class='op'>&lt;-</span> <span class='fl'>0.0583</span></span>
 <span></span>
 <span><span class='va'>ci_upper</span> <span class='op'>&lt;-</span> <span class='va'>est_ate</span> <span class='op'>+</span> <span class='op'>(</span><span class='va'>se_diff</span> <span class='op'>*</span> <span class='fl'>1.96</span><span class='op'>)</span></span>
 <span><span class='va'>ci_lower</span> <span class='op'>&lt;-</span> <span class='va'>est_ate</span> <span class='op'>-</span> <span class='op'>(</span><span class='va'>se_diff</span> <span class='op'>*</span> <span class='fl'>1.96</span><span class='op'>)</span></span>
@@ -1900,22 +1900,22 @@ Upper 95% Confidence Interval
 <tbody>
 <tr>
 <td style="text-align:right;">
-0.057503
+0.0583
 </td>
 <td style="text-align:right;">
 0.0206766
 </td>
 <td style="text-align:right;">
-0.0108855
+0.010918
 </td>
 <td style="text-align:right;">
-1.899468
+1.893806
 </td>
 <td style="text-align:right;">
--0.0006589
+-0.0007227
 </td>
 <td style="text-align:right;">
-0.0420121
+0.0420758
 </td>
 </tr>
 </tbody>
@@ -1923,7 +1923,7 @@ Upper 95% Confidence Interval
 </div>
 <p>These tables and plots above show the difference-in-means between voters that have either served in the military or currently do (Military-Affiliated Voters) vs. voters that have never served in the military (Non-Military Affiliated Voters). The estimated average treatment effect suggests that military-affiliated voters are 2.07 percentage points more likely to vote for candidates that are military veterans themselves than non-military affiliated voters are.</p>
 <p>While the coefficient of interest tells us that the treatment of being in the military makes you 2.07 percentage points more likely to vote for candidates that are themselves military veterans than voters that have no military affiliation, we should not interpret this treatment as causal. Using an alpha of 0.05 and looking at the p-value of the regression, as well as the p-values coming from the permutation test and the calculations using the standard error of the difference-in-means, all of them are above 0.05. While all of the p-values hovered just above the significance cutoff of 0.05, they were still over that threshold, meaning that we fail to reject the null hypothesis that there is no difference in voting rates for veteran candidates between military-affiliated voters and voters with no military affiliation.</p>
-<p>Additionally, the 95% confidence interval of (0, 0.042) is another reason why the results should not be interpreted causally. Since 0 is within the confidence interval, even though it is at the extremely low end, it cannot be ruled out within our chosen confidence parameters that there is no effect on voting for military veterans from having served in the military.</p>
+<p>Additionally, the 95% confidence interval of (-0.0007, 0.04207) is another reason why the results should not be interpreted causally. Since 0 is within the confidence interval, even though it is at the extremely low end, it cannot be ruled out within our chosen confidence parameters that there is no effect on voting for military veterans from having served in the military.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>02138</span><span class='op'>)</span></span>

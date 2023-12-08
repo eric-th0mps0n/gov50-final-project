@@ -214,11 +214,11 @@ est_ate <- cces_vet_cands_test |>
   specify(vote ~ military_mem, success = "Voted") |>
   calculate(stat = "diff in props", order = c("Military", "Non-Military"))
 
-se_diff <- sqrt(((0.5482128*(1 - 0.5482128)) / 2409) + ((0.5275362 * (1 - 0.5275362)) / 15895))
+se_diff <- 0.010918
 
 z_score = est_ate / se_diff
 
-p_val <- 2 * pnorm(1.899468, lower.tail = FALSE)
+p_val <- 0.0583
 
 ci_upper <- est_ate + (se_diff * 1.96)
 ci_lower <- est_ate - (se_diff * 1.96)
@@ -234,7 +234,7 @@ value_table
   
   While the coefficient of interest tells us that the treatment of being in the military makes you 2.07 percentage points more likely to vote for candidates that are themselves military veterans than voters that have no military affiliation, we should not interpret this treatment as causal. Using an alpha of 0.05 and looking at the p-value of the regression, as well as the p-values coming from the permutation test and the calculations using the standard error of the difference-in-means, all of them are above 0.05. While all of the p-values hovered just above the significance cutoff of 0.05, they were still over that threshold, meaning that we fail to reject the null hypothesis that there is no difference in voting rates for veteran candidates between military-affiliated voters and voters with no military affiliation. 
   
-  Additionally, the 95% confidence interval of (0, 0.042) is another reason why the results should not be interpreted causally. Since 0 is within the confidence interval, even though it is at the extremely low end, it cannot be ruled out within our chosen confidence parameters that there is no effect on voting for military veterans from having served in the military.
+  Additionally, the 95% confidence interval of (-0.0007, 0.04207) is another reason why the results should not be interpreted causally. Since 0 is within the confidence interval, even though it is at the extremely low end, it cannot be ruled out within our chosen confidence parameters that there is no effect on voting for military veterans from having served in the military.
 
 ```{r}
 set.seed(02138)
