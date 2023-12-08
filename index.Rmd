@@ -1,7 +1,7 @@
 ---
 title: "Gov 50 Final Project"
 author: "Eric Thompson"
-description: "My final project"
+description: "Military Service Impact on Voting Habits when Military Veterans are Running for Federal Office"
 output:
   distill::distill_article:
     self_contained: false
@@ -9,9 +9,9 @@ output:
 
 ## Introduction
 
-  For this research paper, the main question is: Are military-affiliated voters more likely to vote for fellow military veterans running for federal office (House of Representatives and Senate) than voters that have no military affiliation? In this study, I seek to show that voters with prior or current military affiliation are more likely to vote for candidates that are themselves miliatry veterans than voters that have no military affiliation through their own service. My hypotheses are as follows:
+  For this research paper, the main question is: Are military-affiliated voters more likely to vote for fellow military veterans running for federal office (House of Representatives and Senate) than voters that have no military affiliation? In this study, I seek to show that voters with prior or current military affiliation are more likely to vote for candidates that are themselves military veterans than voters that have no military affiliation through their own service. My hypotheses are as follows:
   
-  Null: there is no difference in voting patterns for military veteran candidates between voters that have military service and voters that do not
+  Null: there is no difference in voting patterns for military veteran candidates between voters that have military service and voters that do not.
   
   Alternative: military-affiliated voters are more likely to vote for fellow veterans than non-military-affiliated voters.
   
@@ -55,7 +55,10 @@ mil_member_count_bar <- cces |> group_by(military_mem) |>
     y = "Count of Voters",
     title = "Number of Military Affiliated and Non-Military Affiliated Voters in Sample",
     source = "CCES 2022 Midterm Election Data, Military Times"
-  ) + scale_fill_discrete(name = "Voter Military Affiliation")
+  ) + scale_fill_discrete(name = "Voter Military Affiliation") +
+  geom_text(aes(label = n),size = 4,
+    vjust = 1.5, position = position_dodge(.9)) +
+  scale_fill_manual(values = c("Non-Military" = "steelblue1", "Military" = "indianred1"))
 
 mil_member_count_bar
 ```
@@ -78,7 +81,10 @@ cces |> group_by(vet_on_ballot) |>
     y = "Proportion of Total Ballots",
     title = "Proportion of respondents that had at least one veteran on their voting ballot",
   ) +
-  scale_fill_discrete(name = "Ballot Indicator")
+  scale_fill_discrete(name = "Ballot Indicator") +
+  geom_text(aes(label = prop),size = 4,
+    vjust = 1.5, position = position_dodge(.9)) +
+  scale_fill_manual(values = c("No Veterans on Ballot" = "steelblue1", "Veteran on Ballot" = "indianred1"))
 ```
 
 This visual shows the proportion of observations in the data set where the voter voted in at least one election where a veteran candidate was available to vote for on their ballot. While the proportion indicates a little less than half of the observations had this option, it still leaves a large number of observations (18276) with which to conduct the analysis of interest to this study. 
@@ -145,14 +151,18 @@ vet_cand_vote <- cces_vet_cands |>
   summarize(n = n()) |>
   mutate(prop = n / sum(n)) |>
   select(-n) |>
-  ggplot(mapping = aes(x = voted_for_vet, y = prop, fill = military_mem)) +
-   geom_col(position = "dodge")  +
+  filter(voted_for_vet == "Yes") |>
+  ggplot(mapping = aes(x = military_mem, y = prop, fill = military_mem)) +
+  geom_col(position = "dodge")  +
   labs(
-    x = "Voted for Veteran on Ballot ",
+    x = "Military Affiliation",
     y = "Proportion of Group",
-    title = "Vote Share Between Groups for Military Veteran Candidates",
+    title = "Proportion of Group that Voted for the Military Veteran Candidate",
     source = "CCES 2022 Midterm Election Data, Military Times"
-  ) + scale_fill_discrete(name = "Voter Military Affiliation")
+  ) + scale_fill_discrete(name = "Voter Military Affiliation") +
+  geom_text(aes(label = prop),size = 4,
+    vjust = 1.5, position = position_dodge(.9)) +
+  scale_fill_manual(values = c("Non-Military" = "steelblue1", "Military" = "indianred1"))
 
 #display visual
 vet_cand_vote
@@ -160,10 +170,28 @@ vet_cand_vote
 
 ```{r}
 cces_vet_cands$military_mem <- factor(cces_vet_cands$military_mem, levels = c("Non-Military", "Military"))
-reg_vote <- lm(voted_for_vet ~ military_mem, data = cces_vet_cands)
-regression_model <- modelsummary(reg_vote, coef_rename = TRUE, fmt = 4, title = "Regression Output of Military-Affiliation on Voting for Veteran Candidates")
-regression_model
 
+reg_vote <- lm(voted_for_vet ~ military_mem, data = cces_vet_cands)
+
+var_lables <- c(
+  "(Intercept)" = "Intercept",
+  "military_memMilitary" = "Military-Affiliated Voter"
+)
+
+regression_model <- modelsummary(
+  reg_vote,
+  statistic = c("s.e. = {std.error}",
+                "p = {p.value}"),
+  coef_map = var_lables,
+  fmt = 4, 
+  title = "Regression Output of Military-Affiliation on Voting for Veteran Candidates", 
+  gof_map = c("nobs"))
+
+regression_model
+```
+
+
+```{r}
 voter_counts <- cces_vet_cands |> 
   count(military_mem)
 
@@ -195,10 +223,10 @@ p_val <- 2 * pnorm(1.899468, lower.tail = FALSE)
 ci_upper <- est_ate + (se_diff * 1.96)
 ci_lower <- est_ate - (se_diff * 1.96)
 
-values <- data.frame(se_diff, z_score, p_val, ci_lower$stat, ci_upper$stat)
+values <- data.frame(p_val, est_ate, se_diff, z_score, ci_lower$stat, ci_upper$stat)
 
 value_table <- knitr::kable(values,
-             col.names = c("Standard Error", "Z-Score", "P-Value", "Lower 95% Confidence Interval", "Upper 95% Confidence Interval"))
+             col.names = c("P-Value", "Average Treatment Effect", "Standard Error", "Z-Score", "Lower 95% Confidence Interval", "Upper 95% Confidence Interval"))
 value_table
 ```
 
@@ -209,6 +237,7 @@ value_table
   Additionally, the 95% confidence interval of (0, 0.042) is another reason why the results should not be interpreted causally. Since 0 is within the confidence interval, even though it is at the extremely low end, it cannot be ruled out within our chosen confidence parameters that there is no effect on voting for military veterans from having served in the military.
 
 ```{r}
+set.seed(02138)
 # Permutation Test
 null_dist <- cces_vet_cands_test |>
   specify(vote ~ military_mem, success = "Voted") |>
@@ -235,7 +264,14 @@ knitr::kable(ci)
 knitr::kable(ate_pval)
 ```
 
-Additionally, to increase the confidence that we cannot reject the null hypothesis, even though the results are close, the p-value from the permutation test is still above our alpha of 0.05. Therefore, based off of our chosen alpha and the results of the permutation test, we cannot rule out that the 0.0207 estimated average treatment effect that we observed in our data set happened by chance, and that there really is no difference betweeen military-affiliated voters and voters with no military affiliation when it comes to voting for candidates that are themselves military veterans. 
+Additionally, to increase the confidence that we cannot reject the null hypothesis, even though the results are close, the p-value from the permutation test is still above our alpha of 0.05. Therefore, based off of our chosen alpha and the results of the permutation test, we cannot rule out that the 0.0207 estimated average treatment effect that we observed in our data set happened by chance, and that there really is no difference between military-affiliated voters and voters with no military affiliation when it comes to voting for candidates that are themselves military veterans. 
+
+
+## Conclusion
+
+In conclusion, from our sample of CCES data from the 2022 midterm elections, we have estimated that, on average, voters who are currently in the military or have served in the military in the past (military-affiliated voters) are 2.07 percentage points more likely to vote for candidates running for federal office (in this case, House of Representatives and Senate) who are also military veterans than voters that have never served in the military. Using an alpha of 0.05, we fail to reject the null hypothesis that in reality there are no difference in population means between the two voter groups, and that the estimated average treatment effect happened by chance. While the p-values that we extracted from our analyses were close to the threshold for statistical significance, they were not low enough, which means we cannot reject the null. Since this is the case, we cannot confirm that the treatment effect reported above is the causal effect of serving in the military on voting habits. In addition, it is important to consider limitations on this study as well. One major limitation is that arguably the most important aspect of voting habits was not included in this study, and that is party of either the voter or the candidate. This confounder could have large impacts on how voters choose to vote, and could very likely have more of an impact on how they vote than veteran status of a voter and / or candidate. Another aspect that could have skewed these results is that the data is from a midterm election. While midterm elections still have decent voter turnout, it is normally voters that are more dedicated to politics that show up for the midterm elections to vote, whereas the general elections on years where the presidential vote is on the ballot tend to attract more of the general population, so these numbers may be influenced by the type of voter that shows up to midterm elections. Given more time and / or money to improve this analysis, I would incorporate party affiliation of the voters and candidates into the analysis, as well as look at data sets from multiple elections, including a general election, instead of just the single midterm election I looked at in this study.
+
+
  
 
 
