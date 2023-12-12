@@ -125,6 +125,7 @@ vet_cand_tab <- knitr::kable(
 
 vet_cand_tab
 
+# calculate the average treatment effect
 ATE <- cces_vet_cands |>
   group_by(military_mem) |>
   drop_na(voted_for_vet) |>
@@ -169,15 +170,19 @@ vet_cand_vote
 ```
 
 ```{r}
+# reorder variables so we can see the military member regression coefficient in the output
 cces_vet_cands$military_mem <- factor(cces_vet_cands$military_mem, levels = c("Non-Military", "Military"))
 
+# regress military-affiliation on voting for a military veteran candidate
 reg_vote <- lm(voted_for_vet ~ military_mem, data = cces_vet_cands)
 
+# creating variable labels for regression output
 var_lables <- c(
   "(Intercept)" = "Intercept",
   "military_memMilitary" = "Military-Affiliated Voter"
 )
 
+# creating a more visually appealing regression output
 regression_model <- modelsummary(
   reg_vote,
   statistic = c("s.e. = {std.error}",
@@ -192,39 +197,37 @@ regression_model
 
 
 ```{r}
+# count how many military and non-military voters are in the data set
 voter_counts <- cces_vet_cands |> 
   count(military_mem)
-
-ATE <- cces_vet_cands |>
-  group_by(military_mem) |>
-  drop_na(voted_for_vet) |>
-  summarize(prop = mean(voted_for_vet)) |>
-  pivot_wider(
-    names_from = military_mem,
-    values_from = prop
-  ) |>
-  mutate("Average Treatment Effect" = Military - `Non-Military`)
 
 cces_vet_cands_test <- cces_vet_cands |>
   mutate(vote = if_else(voted_for_vet == 1, "Voted", "Didn't Vote")) |>
   select(vote, voted_for_vet, military_mem) |>
   na.omit()
 
+# estimate the ATE
 est_ate <- cces_vet_cands_test |>
   specify(vote ~ military_mem, success = "Voted") |>
   calculate(stat = "diff in props", order = c("Military", "Non-Military"))
 
+# save the standard error to add to table later
 se_diff <- 0.010918
 
+# calculate z-score
 z_score = est_ate / se_diff
 
+# save p-value to add to table later
 p_val <- 0.0583
 
+# calculate 95% confidence interval
 ci_upper <- est_ate + (se_diff * 1.96)
 ci_lower <- est_ate - (se_diff * 1.96)
 
+# create a data frame of important stats
 values <- data.frame(p_val, est_ate, se_diff, z_score, ci_lower$stat, ci_upper$stat)
 
+# make a more visually appealing output
 value_table <- knitr::kable(values,
              col.names = c("P-Value", "Average Treatment Effect", "Standard Error", "Z-Score", "Lower 95% Confidence Interval", "Upper 95% Confidence Interval"))
 value_table
@@ -238,6 +241,7 @@ value_table
 
 ```{r}
 set.seed(02138)
+
 # Permutation Test
 null_dist <- cces_vet_cands_test |>
   specify(vote ~ military_mem, success = "Voted") |>
@@ -245,9 +249,11 @@ null_dist <- cces_vet_cands_test |>
   generate(reps = 1000, type = "permute") |>
   calculate(stat = "diff in props", order = c("Military", "Non-Military"))
 
+# calculate p-value for permutation test
 ate_pval <- null_dist |>
   get_p_value(obs_stat = est_ate, direction = "both")
 
+# visual output of the permutation test sample distribution
 null_dist |>
   visualize() +
   shade_p_value(obs_stat = est_ate, direction = "both") +
@@ -257,10 +263,12 @@ null_dist |>
     title = "Permutation Test Sample Distribution"
   )
 
+# calculate 95% confidence interval of the sampling distribution
 ci <- null_dist |>
   get_ci(level = 0.95)
 knitr::kable(ci)
 
+# display p-value
 knitr::kable(ate_pval)
 ```
 
